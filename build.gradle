@@ -1,0 +1,62 @@
+plugins {
+    id("groovy") 
+    id("io.micronaut.application") version "3.3.2"
+    id("com.microsoft.azure.azurefunctions") version "1.8.2"
+}
+
+version = "0.1"
+group = "com.example"
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    annotationProcessor("io.micronaut.data:micronaut-data-document-processor")
+    implementation("io.micronaut:micronaut-jackson-databind")
+    implementation("io.micronaut:micronaut-runtime")
+    implementation("io.micronaut.data:micronaut-data-mongodb")
+    implementation("jakarta.annotation:jakarta.annotation-api")
+    runtimeOnly("ch.qos.logback:logback-classic")
+    runtimeOnly("org.mongodb:mongodb-driver-sync")
+    testImplementation("org.testcontainers:mongodb")
+    testImplementation("org.testcontainers:spock")
+    testImplementation("org.testcontainers:testcontainers")
+    implementation("io.micronaut:micronaut-validation")
+
+    testImplementation("io.micronaut:micronaut-http-client")
+
+}
+
+
+application {
+    mainClass.set("com.example.Application")
+}
+java {
+    sourceCompatibility = JavaVersion.toVersion("11")
+    targetCompatibility = JavaVersion.toVersion("11")
+}
+
+tasks {
+    azurefunctions {
+        resourceGroup = "java-functions-group"
+        appName = "demo"
+        pricingTier = "Consumption"
+        region = "westus"
+        runtime {
+          os = "linux"
+        }
+        localDebug = "transport=dt_socket,server=y,suspend=n,address=5005"
+}
+}
+graalvmNative.toolchainDetection = false
+micronaut {
+    runtime("azure_function")
+    testRuntime("spock2")
+    processing {
+        incremental(true)
+        annotations("com.example.*")
+    }
+}
+
+
